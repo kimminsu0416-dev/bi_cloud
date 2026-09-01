@@ -45,8 +45,8 @@ def summarize_news_with_gemini(news_item: dict, filter_prompt: str = "") -> dict
 """
 
     prompt = f"""
-당신은 IT 엔터프라이즈 및 클라우드/보안 분야의 최고 전략 기획 전문가(CPO/CTO 보좌관)입니다.
-아래 제공된 뉴스 기사 정보를 분석하여, 경영진과 실무진이 5초 안에 핵심을 파악할 수 있도록 스마트 큐레이션 요약을 작성해주세요.
+당신은 IT 엔터프라이즈 및 클라우드/보안 분야의 최고 전략 요약 전문가입니다.
+아래 제공된 뉴스 기사를 분석하여 핵심 사실과 주요 내용을 정확하고 명확한 3줄 요약 문장으로 정리해주세요.
 
 [기사 정보]
 - 관련 키워드: {keyword}
@@ -55,21 +55,18 @@ def summarize_news_with_gemini(news_item: dict, filter_prompt: str = "") -> dict
 {filter_instruction}
 
 [작성 규칙]
-1. summary_points: 기사의 핵심 사실과 주요 내용을 정확하고 간결한 3줄 문장으로 요약 (한국어 명사형 종결 또는 깔끔한 문장).
-2. insight: 이 뉴스가 해당 업계, 관련 시장, 또는 기업 보안/인프라 전략에 시사하는 바(비즈니스 시사점) 1문장.
-3. 반드시 아래 JSON 포맷으로만 응답할 것 (마크다운 코드블록 없이 순수 JSON만 반환):
+1. summary_points: 기사의 핵심 사실을 3개의 한국어 문장(개조식/명사형 종결 또는 깔끔한 문장)으로 요약.
+2. 반드시 아래 JSON 포맷으로만 응답할 것:
 
 {{
   "summary_points": [
-    "첫 번째 핵심 요약 문장",
-    "두 번째 핵심 요약 문장",
-    "세 번째 핵심 요약 문장"
-  ],
-  "insight": "이 뉴스가 갖는 비즈니스/기술적 시사점 한 줄"
+    "첫 번째 핵심 사실 요약",
+    "두 번째 핵심 사실 요약",
+    "세 번째 핵심 사실 요약"
+  ]
 }}
 """
 
-    # 모델 호출 (gemini-2.5-flash 우선 사용)
     candidate_models = ["gemini-2.5-flash", "gemini-1.5-flash"]
     
     for model_name in candidate_models:
@@ -84,7 +81,6 @@ def summarize_news_with_gemini(news_item: dict, filter_prompt: str = "") -> dict
             )
             
             response_text = response.text.strip()
-            # 혹시 마크다운 블록이 붙어있을 경우 제거
             if response_text.startswith("```json"):
                 response_text = response_text[7:]
             if response_text.startswith("```"):
@@ -96,16 +92,13 @@ def summarize_news_with_gemini(news_item: dict, filter_prompt: str = "") -> dict
             
             return {
                 "summary_points": data.get("summary_points", [description]),
-                "insight": data.get("insight", "성공적으로 AI 큐레이션이 완료되었습니다."),
                 "is_ai_generated": True
             }
-        except Exception as e:
-            # 다음 모델 시도 또는 예외 발생 시 로깅 후 fallback
+        except Exception:
             continue
 
-    # 모든 모델 호출 실패 시 fallback
     return {
         "summary_points": [news_item.get("description", "")],
-        "insight": "AI 요약 생성 중 일시적인 지연이 발생하여 원문 기본 요약을 표시합니다.",
         "is_ai_generated": False
     }
+

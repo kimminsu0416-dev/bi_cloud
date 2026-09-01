@@ -709,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'curation-card';
                 card.style.setProperty('--kw-border-color', kwColor);
                 card.setAttribute('data-keyword', keyword.toLowerCase());
-                card.setAttribute('data-content', (art.title + ' ' + (art.summary_points || []).join(' ') + ' ' + art.insight).toLowerCase());
+                card.setAttribute('data-content', (art.title + ' ' + (art.summary_points || []).join(' ')).toLowerCase());
 
                 const summaryListHtml = (art.summary_points || []).map(p => `<li>${escapeHtml(p)}</li>`).join('');
 
@@ -738,23 +738,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${summaryListHtml}
                             </ul>
                         </div>
-
-                        ${art.insight ? `
-                        <div class="insight-box" style="border-left-color:${kwColor}">
-                            <div class="insight-label">💡 비즈니스 시사점 / Key Insight</div>
-                            <div class="insight-content">${escapeHtml(art.insight)}</div>
-                        </div>
-                        ` : ''}
                     </div>
 
                     <div class="card-footer">
-                        <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="btn-view-origin">
-                            기사 원문 보기
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                <polyline points="15 3 21 3 21 9"></polyline>
-                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                            </svg>
+                        <span class="source-tag">실제 기사</span>
+                        <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="btn-read-more">
+                            원문 기사 보기 ➔
                         </a>
                     </div>
                 `;
@@ -818,9 +807,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 (art.summary_points || []).forEach(p => {
                     reportText += `  - ${p}\n`;
                 });
-                if (art.insight) {
-                    reportText += `• 비즈니스 시사점: ${art.insight}\n`;
-                }
                 reportText += `• 기사 원문: ${art.link}\n`;
             });
             reportText += `\n----------------------------------------\n`;

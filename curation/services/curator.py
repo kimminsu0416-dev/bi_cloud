@@ -54,10 +54,10 @@ def process_single_keyword(
             "pub_date": item["pub_date"],
             "keyword": cleaned_keyword,
             "summary_points": ai_summary["summary_points"],
-            "insight": ai_summary["insight"],
             "is_ai_generated": ai_summary["is_ai_generated"],
             "is_mock": False,
         })
+
 
     return {
         "keyword": cleaned_keyword,
