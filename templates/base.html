@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}BI CLOUD | 비즈니스 인텔리전스 SaaS 플랫폼{% endblock %}</title>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              500: '#14b8a6',
+              600: '#0d9488',
+              900: '#134e4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Base Custom Global CSS -->
+  <style>
+    :root {
+      --bg-main: #09090b;
+      --bg-card: #121215;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(255, 255, 255, 0.25);
+    }
+    body {
+      background-color: var(--bg-main);
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+    }
+    .glass-nav {
+      background: rgba(14, 14, 18, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .bw-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+      transition: all 0.25s ease;
+    }
+    .bw-card:hover {
+      border-color: var(--border-active);
+    }
+    .bw-input {
+      background-color: #18181b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      border-radius: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    .bw-input:focus {
+      outline: none;
+      background-color: #202024;
+      border-color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+    .bw-btn-primary {
+      background-color: #ffffff;
+      color: #09090b;
+      font-weight: 600;
+      border-radius: 0.75rem;
+      transition: all 0.2s ease;
+    }
+    .bw-btn-primary:hover {
+      background-color: #e4e4e7;
+      transform: translateY(-1px);
+    }
+    .bw-btn-secondary {
+      background-color: #18181b;
+      color: #e4e4e7;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      transition: all 0.2s ease;
+    }
+    .bw-btn-secondary:hover {
+      background-color: #27272a;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+  {% if user.is_authenticated %}
+  <!-- Premium SaaS Navigation Header -->
+  <header class="glass-nav sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Logo & Service Switcher -->
+        <div class="flex items-center gap-8">
+          <a href="/" class="flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-white to-zinc-400 flex items-center justify-center text-black font-extrabold text-sm shadow-md group-hover:scale-105 transition-transform">
+              BI
+            </div>
+            <div class="flex flex-col">
+              <span class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                BI CLOUD
+                <span class="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-800 text-zinc-300 rounded border border-zinc-700">SaaS</span>
+              </span>
+            </div>
+          </a>
+
+          <!-- Main Nav Tabs -->
+          <nav class="hidden md:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800/80">
+            <a href="/" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 {% if active_tab == 'news' %}bg-white text-black shadow{% else %}text-zinc-400 hover:text-white hover:bg-zinc-800/60{% endif %}">
+              <span>📰</span>
+              <span>AI 뉴스 큐레이션</span>
+            </a>
+            <a href="/exchange/" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 {% if active_tab == 'exchange' %}bg-white text-black shadow{% else %}text-zinc-400 hover:text-white hover:bg-zinc-800/60{% endif %}">
+              <span>💱</span>
+              <span>실시간 환율 정보</span>
+            </a>
+            {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'accounts:user_management' %}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 {% if active_tab == 'users' %}bg-white text-black shadow{% else %}text-zinc-400 hover:text-white hover:bg-zinc-800/60{% endif %}">
+              <span>👥</span>
+              <span>사용자/팀 관리</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            </a>
+            {% endif %}
+          </nav>
+        </div>
+
+        <!-- Right Side: User Profile & Actions -->
+        <div class="flex items-center gap-3">
+          
+          <!-- User Status Badge -->
+          <div class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs">
+            <span class="w-2 h-2 rounded-full {% if user.is_superuser %}bg-emerald-400{% else %}bg-blue-400{% endif %} animate-pulse"></span>
+            <span class="font-mono text-zinc-300 truncate max-w-[180px]">{{ user.email|default:user.username }}</span>
+            {% if user.is_superuser %}
+            <span class="px-1.5 py-0.5 text-[10px] font-bold bg-zinc-800 text-zinc-400 rounded">Master Admin</span>
+            {% endif %}
+          </div>
+
+          <!-- Password Change -->
+          <a href="{% url 'accounts:change_password' %}" class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition border border-transparent hover:border-zinc-700" title="비밀번호 변경">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+          </a>
+
+          <!-- Logout Button -->
+          <a href="{% url 'accounts:logout' %}" class="px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-red-400 bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 hover:border-red-900/50 transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>로그아웃</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+  {% endif %}
+
+  <!-- Messages / Alerts -->
+  {% if messages %}
+  <div class="max-w-4xl mx-auto w-full px-4 pt-4">
+    {% for message in messages %}
+    <div class="p-4 rounded-xl mb-3 text-sm flex items-center gap-3 border shadow-lg {% if message.tags == 'error' %}bg-red-950/80 border-red-800 text-red-200{% elif message.tags == 'success' %}bg-emerald-950/80 border-emerald-800 text-emerald-200{% else %}bg-zinc-900 border-zinc-700 text-zinc-200{% endif %}">
+      <span>{% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✅{% else %}ℹ️{% endif %}</span>
+      <span class="font-medium">{{ message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Main Content Block -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

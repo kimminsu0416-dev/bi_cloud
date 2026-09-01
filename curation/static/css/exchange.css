@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Modern Black & White Monochrome Exchange Dashboard Theme
+   ========================================================================== */
+
+:root {
+  --bg-main: #09090b;
+  --bg-card: #121215;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.25);
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Pretendard', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.75;
+  letter-spacing: -0.01em;
+}
+
+/* Minimalist B&W Monochrome Cards */
+.bw-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  transition: border-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.bw-card:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 16px 40px -12px rgba(255, 255, 255, 0.03);
+}
+
+/* Monochrome Input Fields */
+.bw-input {
+  background-color: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-radius: 0.875rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bw-input:focus {
+  outline: none;
+  background-color: #202024;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* B&W Buttons */
+.bw-btn-primary {
+  background-color: #ffffff;
+  color: #09090b;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.bw-btn-primary:hover {
+  background-color: #e4e4e7;
+  transform: translateY(-1px);
+}
+
+.bw-btn-secondary {
+  background-color: #18181b;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.bw-btn-secondary:hover {
+  background-color: #27272a;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Spacious Table Styling */
+.bw-table-wrapper {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+.bw-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.bw-table thead th {
+  background-color: #16161a;
+  padding: 1.25rem 1.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.bw-table tbody tr {
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.bw-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.bw-table tbody td {
+  padding: 1.35rem 1.75rem;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+/* Conversion Tab Toggle */
+.tab-active {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  font-weight: 700 !important;
+}
+
+.tab-inactive {
+  background-color: transparent !important;
+  color: #71717a !important;
+}
+
+.tab-inactive:hover {
+  color: #d4d4d8 !important;
+}
+
+/* Badge */
+.bw-badge {
+  background-color: #1c1c21;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+}

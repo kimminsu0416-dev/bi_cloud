@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: bi-cloud-saas
+    runtime: python
+    buildCommand: pip install uv && uv sync && uv run python manage.py migrate && uv run python init_superuser.py
+    startCommand: uv run gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NAVER_CLIENT_ID
+        sync: false
+      - key: NAVER_CLIENT_SECRET
+        sync: false
+      - key: API_KEY
+        sync: false

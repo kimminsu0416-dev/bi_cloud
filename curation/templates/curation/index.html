@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 뉴스 큐레이션 인텔리전스 | AI News Curation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="antialiased">
+    <!-- SaaS Global Navigation Bar -->
+    <header style="background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; padding: 0.75rem 2rem;">
+        <div style="max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em;">
+                    <div style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900;">BI</div>
+                    <span>BI CLOUD <span style="font-size: 0.65rem; font-family: monospace; background: #27272a; color: #a1a1aa; padding: 2px 6px; border-radius: 4px; border: 1px solid #3f3f46;">SaaS</span></span>
+                </a>
+                <nav style="display: flex; gap: 0.5rem; background: #18181b; padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                    <a href="/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 700; text-decoration: none; background: #fff; color: #000; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>📰</span> <span>AI 뉴스 큐레이션</span>
+                    </a>
+                    <a href="/exchange/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
+                        <span>💱</span> <span>실시간 환율 정보</span>
+                    </a>
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'accounts:user_management' %}" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
+                        <span>👥</span> <span>사용자/팀 관리</span>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: #18181b; border: 1px solid rgba(255,255,255,0.08); padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.8rem; font-family: monospace; color: #d4d4d8;">
+                    <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34d399;"></span>
+                    <span>{{ user.email|default:user.username }}</span>
+                </div>
+                <a href="{% url 'accounts:change_password' %}" title="비밀번호 변경" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; font-weight: 600; text-decoration: none; background: #18181b; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; display: flex; align-items: center; gap: 0.3rem;">
+                    <span>🔑</span> <span>비밀번호 변경</span>
+                </a>
+                <a href="{% url 'accounts:logout' %}" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; text-decoration: none; background: #27272a; color: #f87171; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;">
+                    로그아웃
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- 상단 헤더 및 실시간 API 모니터링 -->
+        <header class="main-header">
+            <div class="brand-area">
+                <div class="logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>AI News <span>Intelligence</span></h1>
+                    <p class="subtitle">엔터프라이즈 맞춤형 AI 뉴스 큐레이션 & 브리핑</p>
+                </div>
+            </div>
+
+            
+            <div class="header-actions">
+                <!-- 네이버 API 무료 한도 실시간 모니터링 위젯 -->
+                <div id="apiUsageWidget" class="api-usage-widget" title="클릭하여 API 무료 사용량 및 과금 방지 상세 현황 확인">
+                    <div class="usage-top">
+                        <div class="usage-label-row">
+                            <span class="usage-title">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                네이버 API 무료 한도
+                            </span>
+                            <span id="badgeUsageStatus" class="badge-usage-safe">🟢 무료 안전</span>
+                        </div>
+                        <div class="usage-numbers">
+                            <span class="usage-metric">오늘: <strong id="widgetDailyText">0 / 25,000</strong>회</span>
+                            <span class="usage-sep">|</span>
+                            <span class="usage-metric">당월: <strong id="widgetMonthlyText">0 / 775,000</strong>회</span>
+                        </div>
+                    </div>
+                    <div class="usage-progress-track">
+                        <div id="widgetProgressBar" class="usage-progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- 키워드 관리 버튼 -->
+                <button id="btnOpenKeywordModal" class="btn-ghost" title="검색 키워드 순서 조정 / 추가 / 삭제">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    키워드 순서 & 관리
+                </button>
+                
+                <button id="btnOpenEnvGuide" class="btn-ghost" title="API 설정 가이드">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    API 환경 설정
+                </button>
+            </div>
+        </header>
+
+        <!-- 메인 컨트롤 패널 -->
+        <main class="dashboard-grid">
+            <section class="control-panel glass-card">
+                <!-- 탭 메뉴: 기본 검색 vs 새로운 키워드 -->
+                <div class="tab-container">
+                    <button class="tab-btn active" data-tab="defaultTab">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        기본 키워드 검색 (<span id="tabKeywordCount">{{ keywords|length }}</span>개)
+                    </button>
+                    <button class="tab-btn" data-tab="customTab">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        새로운 키워드 입력 검색
+                    </button>
+                </div>
+
+                <!-- 탭 1: 기본 키워드 선택 영역 -->
+                <div id="defaultTab" class="tab-pane active">
+                    <div class="pane-header">
+                        <div class="pane-title-group">
+                            <h3>사전 정의된 타겟 키워드 (우선순위 순서대로 조회)</h3>
+                            <p class="pane-desc">[키워드 순서 & 관리]에서 드래그나 위/아래 버튼으로 키워드 순서를 바꾸면 가장 관심 있는 뉴스를 먼저 볼 수 있습니다.</p>
+                        </div>
+                        <div class="chip-tools">
+                            <button id="btnSelectAll" class="btn-micro">전체 선택</button>
+                            <button id="btnDeselectAll" class="btn-micro">전체 해제</button>
+                            <span id="selectedCountBadge" class="count-pill">{{ keywords|length }}/{{ keywords|length }} 선택됨</span>
+                        </div>
+                    </div>
+                    
+                    <div class="keyword-chips-grid" id="keywordChipsContainer">
+                        {% for kw in keywords %}
+                        <label class="keyword-chip selected">
+                            <input type="checkbox" name="keyword_chip" value="{{ kw }}" checked>
+                            <span class="chip-label">{{ kw }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 탭 2: 새로운 키워드 입력 영역 -->
+                <div id="customTab" class="tab-pane">
+                    <div class="pane-header">
+                        <div class="pane-title-group">
+                            <h3>사용자 지정 검색 키워드</h3>
+                            <p class="pane-desc">검색하고 싶은 키워드를 쉼표(,) 또는 줄바꿈으로 자유롭게 입력하세요. 입력한 순서대로 상단에 표시됩니다.</p>
+                        </div>
+                    </div>
+                    <div class="input-wrapper">
+                        <textarea id="customKeywordsInput" class="custom-textarea" rows="3" placeholder="예: 인공지능 서버, 엔비디아 H200, 양자암호 통신, 클라우드 네이티브"></textarea>
+                    </div>
+                    <div class="quick-tags">
+                        <span class="tag-title">추천 예시:</span>
+                        <button class="btn-tag" data-insert="생성형 AI, LLM 인프라">#생성형 AI 인프라</button>
+                        <button class="btn-tag" data-insert="국가정보원 보안 가이드, CSAP 인증">#공공 보안 가이드</button>
+                        <button class="btn-tag" data-insert="VMware 라이선스 대체, 오픈소스 VDI">#가상화 전환</button>
+                    </div>
+                </div>
+
+                <!-- 검색 기간 설정 섹션 (Date Range) -->
+                <div class="date-filter-section">
+                    <div class="section-title-row">
+                        <div class="title-with-badge">
+                            <h4>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                검색 기간 설정
+                            </h4>
+                        </div>
+                        <span class="field-hint">기사의 발행 시점을 기준으로 필터링합니다</span>
+                    </div>
+
+                    <div class="date-period-selector">
+                        <label class="period-btn active">
+                            <input type="radio" name="date_period" value="all" checked>
+                            <span>전체 (최신순)</span>
+                        </label>
+                        <label class="period-btn">
+                            <input type="radio" name="date_period" value="3d">
+                            <span>최근 3일</span>
+                        </label>
+                        <label class="period-btn">
+                            <input type="radio" name="date_period" value="1w">
+                            <span>최근 1주일</span>
+                        </label>
+                        <label class="period-btn">
+                            <input type="radio" name="date_period" value="2w">
+                            <span>최근 2주일</span>
+                        </label>
+                        <label class="period-btn">
+                            <input type="radio" name="date_period" value="1m">
+                            <span>최근 1개월</span>
+                        </label>
+                        <label class="period-btn" id="periodCustomBtn">
+                            <input type="radio" name="date_period" value="custom">
+                            <span>📅 직접 날짜 지정</span>
+                        </label>
+                    </div>
+
+                    <!-- 달력 직접 입력 영역 -->
+                    <div id="customDateRangeBox" class="custom-date-range-box" style="display: none;">
+                        <div class="date-input-group">
+                            <label>시작일:</label>
+                            <input type="date" id="startDatePicker" class="date-picker-input">
+                        </div>
+                        <span class="date-sep">~</span>
+                        <div class="date-input-group">
+                            <label>종료일:</label>
+                            <input type="date" id="endDatePicker" class="date-picker-input">
+                        </div>
+                        <span id="dateRangeNotice" class="date-range-notice"></span>
+                    </div>
+                </div>
+
+                <!-- 필터링 프롬프트 영역 (Gemini 맞춤 지침) -->
+                <div class="filter-prompt-section">
+                    <div class="section-title-row">
+                        <div class="title-with-badge">
+                            <h4>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                AI 맞춤형 필터링 & 분석 프롬프트
+                            </h4>
+                            <span class="ai-badge">Gemini 2.5 Intelligence</span>
+                        </div>
+                        <span class="field-hint">기사 요약 시 AI가 특별히 집중할 관점을 지정합니다</span>
+                    </div>
+
+                    <div class="prompt-templates">
+                        <button class="prompt-chip" data-prompt="보안 취약점 및 해킹/침해 사고, 공공 보안 규제 준수 이슈 중심으로 요약해줘.">
+                            🔒 보안 & 규제 이슈 중심
+                        </button>
+                        <button class="prompt-chip" data-prompt="신제품 출시, 대규모 수주/공급 계약 체결 및 파트너십 소식 위주로 요약해줘.">
+                            🚀 신제품 & 수주 계약 위주
+                        </button>
+                        <button class="prompt-chip" data-prompt="시장 경쟁 구도, 기업 실적 동향 및 시장 점유율 변화 관점에서 요약해줘.">
+                            📊 시장 경쟁 & 실적 동향
+                        </button>
+                        <button class="prompt-chip" data-prompt="임원진 의사결정 보고용으로 비즈니스 기회와 리스크 요인을 명확히 짚어 요약해줘.">
+                            💡 경영진 전략 보고용
+                        </button>
+                    </div>
+
+                    <div class="textarea-container">
+                        <textarea id="filterPromptInput" class="filter-textarea" rows="2" placeholder="필터링 프롬프트 입력 (예: 공공 조달 사업 및 금융권 망분리 혁신 관련 소식을 중점 분석해줘)"></textarea>
+                    </div>
+                </div>
+
+                <!-- 실행 바 & 옵션 -->
+                <div class="action-bar">
+                    <div class="options-group">
+                        <label class="select-label">
+                            <span>키워드당 기사 수:</span>
+                            <select id="countPerKeyword" class="custom-select">
+                                <option value="2" selected>최신 2개 기사 (기본)</option>
+                                <option value="3">최신 3개 기사</option>
+                                <option value="1">핵심 1개 기사</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="btnCurate" class="btn-primary-glow">
+                            <span class="btn-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                            <span class="btn-text">AI 뉴스 큐레이션 실행</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 결과 대시보드 영역 -->
+            <section class="results-panel">
+                <div class="results-header" id="resultsHeader" style="display: none;">
+                    <div class="results-stats">
+                        <h2>큐레이션 결과 브리핑</h2>
+                        <div class="stats-pills">
+                            <span id="statKeywords" class="pill">0개 키워드</span>
+                            <span id="statArticles" class="pill highlight">0개 실제 기사 수집됨</span>
+                            <span id="statPeriod" class="pill period-pill" style="display: none;"></span>
+                            <span id="statPrompt" class="pill prompt-pill" style="display: none;"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="results-tools">
+                        <div class="search-filter-box">
+                            <input type="text" id="resultFilterSearch" placeholder="결과 내 키워드/내용 검색...">
+                        </div>
+                        <button id="btnCopyAll" class="btn-secondary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            보고서 형식 복사
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 초기 대기 화면 -->
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon-ring">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                        </svg>
+                    </div>
+                    <h3>실시간 AI 뉴스 큐레이션을 시작해보세요</h3>
+                    <p>우선순위 순서대로 정렬된 키워드의 최신 실존 기사 검색과 Gemini AI 3줄 요약을 실시간으로 확인하실 수 있습니다.</p>
+                    
+                    <div class="quick-start-buttons">
+                        <button id="btnQuickStartDefault" class="btn-pill-action">기본 키워드로 즉시 큐레이션 실행 →</button>
+                    </div>
+                </div>
+
+                <!-- 로딩 화면 -->
+                <div id="loadingState" class="loading-state" style="display: none;">
+                    <div class="pulsing-radar">
+                        <div class="radar-circle"></div>
+                        <div class="radar-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 id="loadingTitle">우선순위 키워드별 실시간 기사 수집 및 AI 요약 중...</h3>
+                    <p id="loadingSubtitle">키워드를 100% 충족하는 실존 기사를 검색하고 비즈니스 인사이트를 도출하고 있습니다.</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                </div>
+
+                <!-- 큐레이션 결과 리스트 컨테이너 -->
+                <div id="curationResultsContainer" class="curation-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- API 사용량 상세 모니터링 모달 -->
+    <div id="usageDetailModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-with-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <h3>네이버 API 무료 사용량 & 과금 방지 모니터링</h3>
+                </div>
+                <button id="btnCloseUsageModal" class="modal-close">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="usage-stats-cards">
+                    <!-- 당일 카드 -->
+                    <div class="stat-card">
+                        <div class="stat-card-title">오늘 사용량 (일별 무료 한도)</div>
+                        <div class="stat-card-number">
+                            <span id="modalDailyCount">0</span>
+                            <small>/ 25,000 회</small>
+                        </div>
+                        <div class="stat-card-bar">
+                            <div id="modalDailyBar" class="stat-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="stat-card-sub">
+                            남은 무료 횟수: <strong id="modalDailyRemaining">25,000</strong>회 (<span id="modalDailyPercent">0%</span>)
+                        </div>
+                    </div>
+
+                    <!-- 당월 카드 -->
+                    <div class="stat-card">
+                        <div class="stat-card-title">이번달 누적 (<span id="modalMonthStr">2026년 9월</span>)</div>
+                        <div class="stat-card-number">
+                            <span id="modalMonthlyCount">0</span>
+                            <small>/ 775,000 회</small>
+                        </div>
+                        <div class="stat-card-bar">
+                            <div id="modalMonthlyBar" class="stat-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="stat-card-sub">
+                            남은 무료 횟수: <strong id="modalMonthlyRemaining">775,000</strong>회 (<span id="modalMonthlyPercent">0%</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 과금 방지 안전 시스템 안내 -->
+                <div class="guard-notice-box">
+                    <div class="guard-icon">🛡️</div>
+                    <div class="guard-text">
+                        <strong>과금 방지 자동 안전 차단 (Safety Guard) 가동 중</strong>
+                        <p>일일 무료 한도(25,000회) 또는 월별 무료 한도(775,000회)에 도달하면 유료 과금이 발생하지 않도록 API 호출이 자동으로 안전 차단됩니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnDoneUsageModal" class="btn-primary">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 키워드 순서 조정 및 관리 모달 -->
+    <div id="keywordModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <div class="modal-title-with-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <h3>검색 키워드 우선순위 순서 & 관리</h3>
+                </div>
+                <button id="btnCloseKeywordModal" class="modal-close">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="keyword-add-bar">
+                    <input type="text" id="newKeywordInput" placeholder="추가할 새 키워드 입력 (예: 양자암호보안, CSAP)" maxlength="50">
+                    <button id="btnAddKeyword" class="btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        키워드 추가
+                    </button>
+                </div>
+
+                <div class="modal-section-title">
+                    <span>
+                        <strong>등록 키워드 (<span id="modalKeywordCount">0</span>개)</strong>
+                        <span style="color:var(--text-muted);margin-left:6px;">(☰ 마우스 드래그 또는 ▲▼ 버튼으로 순서를 변경하세요)</span>
+                    </span>
+                    <button id="btnResetKeywords" class="btn-link-danger">기본 23개 키워드로 초기화</button>
+                </div>
+                
+                <div id="modalKeywordList" class="reorder-keyword-list"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnDoneKeywordModal" class="btn-primary">순서 저장 및 닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API 설정 안내 모달 -->
+    <div id="envGuideModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>API Key 환경 변수 설정 안내 (.env)</h3>
+                <button id="btnCloseModal" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>본 서비스는 NAVER API HUB(네이버 클라우드 플랫폼) 및 Google Gemini 생성형 AI를 활용합니다. <strong>프로젝트 루트 폴더의 <code>.env</code> 파일</strong>에 설정합니다.</p>
+                
+                <div class="env-sample-block">
+                    <pre><code># 1. Google Gemini API Key
+GEMINI_API_KEY=your_gemini_api_key
+
+# 2. Naver Cloud Platform (NAVER API HUB)
+NAVER_CLIENT_ID=your_client_id
+NAVER_CLIENT_SECRET=your_client_secret</code></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnConfirmModal" class="btn-primary">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="initialKeywordsData" type="application/json">
+        {{ keywords_json|safe }}
+    </script>
+    <script id="initialUsageData" type="application/json">
+        {{ usage_stats_json|safe }}
+    </script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}팀원 및 사용자 계정 관리 | BI CLOUD SaaS{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+  
+  <!-- Header & Action Button -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-zinc-800 gap-4">
+    <div class="space-y-1">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-xs font-mono text-zinc-400">
+        <span>ENTERPRISE USER MANAGEMENT</span>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white">
+        사용자 & 팀원 계정 관리
+      </h1>
+      <p class="text-sm text-zinc-400">
+        동료 직원이나 외부 파트너가 SaaS 서비스를 이용할 수 있도록 새로운 로그인 계정을 발급하고 관리합니다.
+      </p>
+    </div>
+
+    <!-- Create User Modal Trigger Button -->
+    <button type="button" onclick="openCreateUserModal()" 
+      class="px-5 py-3 bw-btn-primary flex items-center justify-center gap-2 text-sm font-bold shadow-lg shadow-white/5 transition self-start sm:self-auto">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      <span>새 계정 발급 (초대)</span>
+    </button>
+  </div>
+
+  <!-- Users Table Section -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between text-xs text-zinc-400">
+      <span>등록된 사용자 목록 (총 <strong class="text-white font-mono" id="userCount">{{ user_list|length }}</strong>명)</span>
+      <span class="font-mono text-zinc-500">Master Console</span>
+    </div>
+
+    <div class="bw-table-wrapper">
+      <div class="overflow-x-auto">
+        <table class="bw-table text-left" id="userTable">
+          <thead>
+            <tr>
+              <th>이름 / 아이디</th>
+              <th>로그인 이메일</th>
+              <th>권한 레벨</th>
+              <th>가입일시</th>
+              <th class="text-right">관리 기능</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800/60" id="userTableBody">
+            {% for u in user_list %}
+            <tr id="user-row-{{ u.id }}">
+              <td>
+                <div class="font-bold text-white flex items-center gap-2">
+                  <span>{{ u.first_name|default:u.username }}</span>
+                  {% if u.id == request.user.id %}
+                  <span class="px-2 py-0.5 text-[10px] bg-zinc-800 text-emerald-400 rounded-full font-mono font-bold border border-emerald-900/50">본인</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <span class="font-mono text-zinc-300">{{ u.email|default:u.username }}</span>
+              </td>
+              <td>
+                {% if u.is_superuser %}
+                <span class="px-2.5 py-1 text-xs font-bold font-mono rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                  마스터 관리자
+                </span>
+                {% elif u.is_staff %}
+                <span class="px-2.5 py-1 text-xs font-bold font-mono rounded-md bg-blue-950/80 text-blue-300 border border-blue-800/60">
+                  운영자
+                </span>
+                {% else %}
+                <span class="px-2.5 py-1 text-xs font-medium font-mono rounded-md bg-zinc-800 text-zinc-300">
+                  일반 멤버
+                </span>
+                {% endif %}
+              </td>
+              <td class="font-mono text-xs text-zinc-400">
+                {{ u.date_joined|date:"Y-m-d H:i" }}
+              </td>
+              <td class="text-right space-x-2">
+                <button type="button" onclick="openResetPasswordModal({{ u.id }}, '{{ u.email|default:u.username }}')" 
+                  class="px-3 py-1.5 text-xs font-medium bw-btn-secondary hover:text-white transition">
+                  비밀번호 초기화
+                </button>
+                {% if u.id != request.user.id %}
+                <button type="button" onclick="deleteUser({{ u.id }}, '{{ u.email|default:u.username }}')" 
+                  class="px-3 py-1.5 text-xs font-medium bg-red-950/40 text-red-400 hover:bg-red-900/80 hover:text-white rounded-lg border border-red-900/50 transition">
+                  삭제
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal 1: Create User Modal -->
+<div id="createUserModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bw-card w-full max-w-md p-8 space-y-6 bg-zinc-950 border border-zinc-700 shadow-2xl relative">
+    
+    <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+      <h3 class="text-lg font-bold text-white">신규 사용자/팀원 계정 발급</h3>
+      <button type="button" onclick="closeCreateUserModal()" class="text-zinc-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="createUserForm" onsubmit="handleCreateUser(event)" class="space-y-4">
+      <div class="space-y-1">
+        <label class="block text-xs font-mono font-semibold text-zinc-400 uppercase">이메일 (로그인 ID)</label>
+        <input type="email" id="modalEmail" required placeholder="user@company.com" class="w-full px-4 py-2.5 bw-input text-sm text-white">
+      </div>
+
+      <div class="space-y-1">
+        <label class="block text-xs font-mono font-semibold text-zinc-400 uppercase">사용자 이름/호칭</label>
+        <input type="text" id="modalName" placeholder="홍길동 팀장" class="w-full px-4 py-2.5 bw-input text-sm text-white">
+      </div>
+
+      <div class="space-y-1">
+        <label class="block text-xs font-mono font-semibold text-zinc-400 uppercase">초기 비밀번호</label>
+        <input type="password" id="modalPassword" required minlength="6" placeholder="최소 6자 이상 지정" class="w-full px-4 py-2.5 bw-input text-sm text-white">
+      </div>
+
+      <div class="pt-2 flex items-center gap-2">
+        <input type="checkbox" id="modalIsAdmin" class="rounded border-zinc-700 bg-zinc-900 text-white focus:ring-0">
+        <label for="modalIsAdmin" class="text-xs text-zinc-300 font-medium">관리자 권한 부여 (계정 관리 및 모든 설정 가능)</label>
+      </div>
+
+      <div class="pt-4 flex items-center justify-end gap-3 border-t border-zinc-800">
+        <button type="button" onclick="closeCreateUserModal()" class="px-4 py-2.5 bw-btn-secondary text-xs font-semibold">취소</button>
+        <button type="submit" class="px-5 py-2.5 bw-btn-primary text-xs font-bold">계정 발급하기</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<!-- Modal 2: Reset Password Modal -->
+<div id="resetPasswordModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bw-card w-full max-w-md p-8 space-y-6 bg-zinc-950 border border-zinc-700 shadow-2xl relative">
+    
+    <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+      <h3 class="text-lg font-bold text-white">비밀번호 강제 재설정</h3>
+      <button type="button" onclick="closeResetPasswordModal()" class="text-zinc-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <form id="resetPasswordForm" onsubmit="handleResetPassword(event)" class="space-y-4">
+      <input type="hidden" id="resetUserId">
+      <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-xs text-zinc-300">
+        대상 계정: <strong class="text-white font-mono ml-1" id="resetUserEmail"></strong>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block text-xs font-mono font-semibold text-zinc-400 uppercase">새 비밀번호 입력</label>
+        <input type="password" id="resetNewPassword" required minlength="6" placeholder="재설정할 새 비밀번호" class="w-full px-4 py-2.5 bw-input text-sm text-white">
+      </div>
+
+      <div class="pt-4 flex items-center justify-end gap-3 border-t border-zinc-800">
+        <button type="button" onclick="closeResetPasswordModal()" class="px-4 py-2.5 bw-btn-secondary text-xs font-semibold">취소</button>
+        <button type="submit" class="px-5 py-2.5 bw-btn-primary text-xs font-bold">비밀번호 변경</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  function openCreateUserModal() {
+    document.getElementById('createUserModal').classList.remove('hidden');
+    document.getElementById('modalEmail').focus();
+  }
+  function closeCreateUserModal() {
+    document.getElementById('createUserModal').classList.add('hidden');
+    document.getElementById('createUserForm').reset();
+  }
+
+  async function handleCreateUser(e) {
+    e.preventDefault();
+    const email = document.getElementById('modalEmail').value.trim();
+    const name = document.getElementById('modalName').value.trim();
+    const password = document.getElementById('modalPassword').value.trim();
+    const isAdmin = document.getElementById('modalIsAdmin').checked;
+
+    try {
+      const res = await fetch("{% url 'accounts:create_user_api' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ email, name, password, is_admin: isAdmin })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        location.reload();
+      } else {
+        alert('생성 실패: ' + data.message);
+      }
+    } catch (err) {
+      alert('오류가 발생했습니다: ' + err.message);
+    }
+  }
+
+  function openResetPasswordModal(id, email) {
+    document.getElementById('resetUserId').value = id;
+    document.getElementById('resetUserEmail').textContent = email;
+    document.getElementById('resetPasswordModal').classList.remove('hidden');
+    document.getElementById('resetNewPassword').focus();
+  }
+  function closeResetPasswordModal() {
+    document.getElementById('resetPasswordModal').classList.add('hidden');
+    document.getElementById('resetPasswordForm').reset();
+  }
+
+  async function handleResetPassword(e) {
+    e.preventDefault();
+    const userId = document.getElementById('resetUserId').value;
+    const newPassword = document.getElementById('resetNewPassword').value.trim();
+
+    try {
+      const res = await fetch(`/api/users/${userId}/reset-password/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ new_password: newPassword })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        closeResetPasswordModal();
+      } else {
+        alert('실패: ' + data.message);
+      }
+    } catch (err) {
+      alert('오류가 발생했습니다: ' + err.message);
+    }
+  }
+
+  async function deleteUser(userId, email) {
+    if (!confirm(`정말로 '${email}' 사용자를 삭제하시겠습니까?`)) return;
+
+    try {
+      const res = await fetch(`/api/users/${userId}/delete/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const row = document.getElementById(`user-row-${userId}`);
+        if (row) row.remove();
+        alert(data.message);
+      } else {
+        alert('삭제 실패: ' + data.message);
+      }
+    } catch (err) {
+      alert('오류가 발생했습니다: ' + err.message);
+    }
+  }
+</script>
+{% endblock %}
