@@ -92,11 +92,23 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'curation' / 'static',
+]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# CSRF Trusted Origins for Cloud Deployment (Render)
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
 ]
 
 # API Keys
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 NAVER_CLIENT_ID = os.getenv('NAVER_CLIENT_ID', '')
 NAVER_CLIENT_SECRET = os.getenv('NAVER_CLIENT_SECRET', '')
+API_KEY = os.getenv('API_KEY', '')
+EXCHANGE_API_KEY = os.getenv('EXCHANGE_API_KEY', '')
+
