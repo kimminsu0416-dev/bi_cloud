@@ -74,26 +74,31 @@ def api_curate(request):
     if not keywords:
         return JsonResponse({"error": "검색할 키워드를 1개 이상 선택하거나 입력해주세요."}, status=400)
 
-    feed_data = curate_news_feed(
-        keywords=keywords,
-        filter_prompt=filter_prompt,
-        count_per_keyword=count_per_keyword,
-        start_date=start_date,
-        end_date=end_date
-    )
+    try:
+        feed_data = curate_news_feed(
+            keywords=keywords,
+            filter_prompt=filter_prompt,
+            count_per_keyword=count_per_keyword,
+            start_date=start_date,
+            end_date=end_date
+        )
+        latest_usage = ApiUsage.get_current_stats()
 
-    # 큐레이션 후 최신 사용량 통계 함께 반환
-    latest_usage = ApiUsage.get_current_stats()
+        return JsonResponse({
+            "success": True,
+            "mode": mode,
+            "filter_prompt": filter_prompt,
+            "start_date": start_date,
+            "end_date": end_date,
+            "data": feed_data,
+            "usage": latest_usage
+        })
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": f"뉴스 수집 및 요약 중 오류가 발생했습니다: {str(e)}"
+        }, status=500)
 
-    return JsonResponse({
-        "success": True,
-        "mode": mode,
-        "filter_prompt": filter_prompt,
-        "start_date": start_date,
-        "end_date": end_date,
-        "data": feed_data,
-        "usage": latest_usage
-    })
 
 
 @csrf_exempt
