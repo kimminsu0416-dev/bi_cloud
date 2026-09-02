@@ -247,7 +247,8 @@
     const newPassword = document.getElementById('resetNewPassword').value.trim();
 
     try {
-      const res = await fetch(`/api/users/${userId}/reset-password/`, {
+      const resetUrl = "{% url 'accounts:reset_password_api' 0 %}".replace('0', userId);
+      const res = await fetch(resetUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -271,7 +272,8 @@
     if (!confirm(`정말로 '${email}' 사용자를 삭제하시겠습니까?`)) return;
 
     try {
-      const res = await fetch(`/api/users/${userId}/delete/`, {
+      const deleteUrl = "{% url 'accounts:delete_user_api' 0 %}".replace('0', userId);
+      const res = await fetch(deleteUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

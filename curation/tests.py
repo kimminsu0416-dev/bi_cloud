@@ -8,6 +8,9 @@ class NewsCurationTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         Keyword.initialize_defaults()
+        from django.contrib.auth.models import User
+        self.user = User.objects.create_user(username='test@test.com', password='testpassword123')
+        self.client.login(username='test@test.com', password='testpassword123')
 
     def test_index_page(self):
         """메인 대시보드 페이지 로드 테스트"""
