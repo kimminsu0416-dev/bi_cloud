@@ -98,9 +98,22 @@ STATICFILES_DIRS = [
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Reverse Proxy (Render / Cloudflare) SSL Header
+# Render는 리버스 프록시 뒤에서 실행되므로 HTTPS 요청임을 Django에 알려야 CSRF 검증이 성공합니다.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+# CSRF & Session Cookie Settings for Cloud HTTPS
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = False
+
 # CSRF Trusted Origins for Cloud Deployment (Render)
 CSRF_TRUSTED_ORIGINS = [
+    'https://bi-cloud.onrender.com',
     'https://*.onrender.com',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
     'http://127.0.0.1:8080',
     'http://localhost:8080',
 ]
