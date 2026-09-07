@@ -108,10 +108,12 @@ CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = False
 
-# CSRF Trusted Origins for Cloud Deployment (Render)
+# CSRF Trusted Origins for Cloud Deployment (Render & Railway)
 CSRF_TRUSTED_ORIGINS = [
     'https://bi-cloud.onrender.com',
     'https://*.onrender.com',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
     'http://127.0.0.1:8080',
