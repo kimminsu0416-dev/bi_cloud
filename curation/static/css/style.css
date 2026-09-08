@@ -1409,6 +1409,48 @@ body {
     background: #E4E4E7;
 }
 
+/* Save Article Button */
+.btn-save-toggle {
+    background: #18181B;
+    color: #A1A1AA;
+    border: 1px solid #27272A;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.btn-save-toggle:hover {
+    background: #27272A;
+    color: #FFFFFF;
+    border-color: #3F3F46;
+}
+
+.btn-save-toggle.saved {
+    background: #064e3b;
+    color: #6ee7b7;
+    border-color: #059669;
+}
+
+.btn-save-toggle.saved:hover {
+    background: #065f46;
+    color: #a7f3d0;
+}
+
+.card-footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+}
+
+
 /* Responsive */
 @media (max-width: 768px) {
     .app-container {

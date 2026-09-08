@@ -741,16 +741,105 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="card-footer">
-                        <span class="source-tag">실제 기사</span>
-                        <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="btn-read-more">
-                            원문 기사 보기 ➔
-                        </a>
+                        <div class="card-footer-actions">
+                            <button class="btn-save-toggle" data-url="${escapeHtml(art.link)}" title="이 기사를 아카이브에 영구 저장">
+                                <span class="save-icon">💾</span>
+                                <span class="save-text">저장하기</span>
+                            </button>
+                            <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="btn-read-more">
+                                원문 보기 ➔
+                            </a>
+                        </div>
                     </div>
                 `;
+
+                // 저장하기 버튼 이벤트 바인딩
+                const saveBtn = card.querySelector('.btn-save-toggle');
+                saveBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isAlreadySaved = saveBtn.classList.contains('saved');
+                    const action = isAlreadySaved ? 'toggle' : 'save';
+
+                    saveBtn.disabled = true;
+                    saveBtn.style.opacity = '0.6';
+
+                    try {
+                        const res = await fetch('/api/articles/save/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: action,
+                                keyword: keyword,
+                                title: art.title,
+                                origin_url: art.link,
+                                press: art.press || '',
+                                published_at: art.pub_date || '',
+                                summary_points: art.summary_points || [],
+                                business_implication: art.business_implication || '',
+                                raw_content: art.snippet || ''
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            if (data.saved) {
+                                saveBtn.classList.add('saved');
+                                saveBtn.querySelector('.save-icon').textContent = '✅';
+                                saveBtn.querySelector('.save-text').textContent = '저장됨';
+                            } else {
+                                saveBtn.classList.remove('saved');
+                                saveBtn.querySelector('.save-icon').textContent = '💾';
+                                saveBtn.querySelector('.save-text').textContent = '저장하기';
+                            }
+                        } else {
+                            alert(`저장 실패: ${data.error || '알 수 없는 오류'}`);
+                        }
+                    } catch (err) {
+                        console.error('Save error:', err);
+                        alert('기사 저장 중 통신 오류가 발생했습니다.');
+                    } finally {
+                        saveBtn.disabled = false;
+                        saveBtn.style.opacity = '1';
+                    }
+                });
 
                 curationResultsContainer.appendChild(card);
             });
         });
+
+        // 렌더링된 기사들의 기존 저장 여부 비동기 확인 및 표시
+        checkSavedArticlesStatus();
+    }
+
+    async function checkSavedArticlesStatus() {
+        const saveBtns = document.querySelectorAll('.btn-save-toggle');
+        if (saveBtns.length === 0) return;
+
+        const urls = Array.from(saveBtns).map(btn => btn.getAttribute('data-url')).filter(Boolean);
+        if (urls.length === 0) return;
+
+        try {
+            const res = await fetch('/api/articles/check-saved/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls: urls })
+            });
+            const data = await res.json();
+            if (data.success && Array.isArray(data.saved_urls)) {
+                const savedSet = new Set(data.saved_urls);
+                saveBtns.forEach(btn => {
+                    const u = btn.getAttribute('data-url');
+                    if (savedSet.has(u)) {
+                        btn.classList.add('saved');
+                        btn.querySelector('.save-icon').textContent = '✅';
+                        btn.querySelector('.save-text').textContent = '저장됨';
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Failed to check saved status:', e);
+        }
     }
 
     // ----------------------------------------------------

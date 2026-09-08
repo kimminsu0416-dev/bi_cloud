@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .models import Keyword, ApiUsage
+from .models import Keyword, ApiUsage, SavedArticle
 from .services.curator import curate_news_feed
 
 
@@ -216,3 +216,201 @@ def api_settings_status(request):
         "has_naver_key": has_naver_key,
         "has_gemini_key": has_gemini_key,
     })
+
+
+@login_required
+def archive_view(request):
+    """
+    저장된 기사 아카이브 대시보드 뷰
+    """
+    keywords = list(SavedArticle.objects.values_list("keyword", flat=True).distinct())
+    articles = SavedArticle.objects.all().order_by("-created_at")
+    total_count = articles.count()
+
+    context = {
+        "articles": articles,
+        "keywords": sorted(keywords),
+        "total_count": total_count,
+        "active_tab": "archive",
+    }
+    return render(request, "curation/archive.html", context)
+
+
+@csrf_exempt
+@login_required
+def api_save_article(request):
+    """
+    기사 아카이브 저장 API (토글 지원)
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except Exception:
+            return JsonResponse({"success": False, "error": "유효하지 않은 요청 데이터입니다."}, status=400)
+
+        origin_url = data.get("origin_url", "").strip()
+        title = data.get("title", "").strip()
+        keyword = data.get("keyword", "").strip() or "기타"
+        press = data.get("press", "").strip()
+        published_at = data.get("published_at", "").strip()
+        summary_points = data.get("summary_points", [])
+        business_implication = data.get("business_implication", "").strip()
+        raw_content = data.get("raw_content", "").strip()
+        memo = data.get("memo", "").strip()
+
+        if not origin_url or not title:
+            return JsonResponse({"success": False, "error": "기사 제목과 원문 링크는 필수입니다."}, status=400)
+
+        # 중복 체크: 이미 저장된 기사가 있는지 확인
+        existing = SavedArticle.objects.filter(origin_url=origin_url).first()
+        if existing:
+            # action이 'toggle'이고 이미 있으면 삭제
+            if data.get("action") == "toggle":
+                existing.delete()
+                return JsonResponse({
+                    "success": True,
+                    "saved": False,
+                    "message": "기사 저장이 취소(삭제)되었습니다."
+                })
+            else:
+                # 정보 업데이트
+                existing.summary_points = summary_points or existing.summary_points
+                existing.business_implication = business_implication or existing.business_implication
+                if memo:
+                    existing.memo = memo
+                existing.save()
+                return JsonResponse({
+                    "success": True,
+                    "saved": True,
+                    "article_id": existing.id,
+                    "message": "기존 저장된 기사 정보가 업데이트되었습니다."
+                })
+
+        # 신규 저장
+        article = SavedArticle.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            keyword=keyword,
+            title=title,
+            origin_url=origin_url,
+            press=press,
+            published_at=published_at,
+            summary_points=summary_points,
+            business_implication=business_implication,
+            raw_content=raw_content,
+            memo=memo,
+        )
+
+        return JsonResponse({
+            "success": True,
+            "saved": True,
+            "article_id": article.id,
+            "message": f"'{title[:20]}...' 기사가 아카이브에 성공적으로 저장되었습니다."
+        })
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@csrf_exempt
+@login_required
+def api_delete_article(request, article_id):
+    """
+    저장된 기사 삭제 API
+    """
+    if request.method in ["POST", "DELETE"]:
+        article = get_object_or_404(SavedArticle, id=article_id)
+        title = article.title
+        article.delete()
+        return JsonResponse({
+            "success": True,
+            "message": f"'{title[:20]}...' 기사가 아카이브에서 삭제되었습니다."
+        })
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@csrf_exempt
+@login_required
+def api_update_article_memo(request, article_id):
+    """
+    저장된 기사의 메모 수정 API
+    """
+    if request.method == "POST":
+        article = get_object_or_404(SavedArticle, id=article_id)
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            memo = data.get("memo", "").strip()
+        except Exception:
+            memo = ""
+
+        article.memo = memo
+        article.save(update_fields=["memo"])
+        return JsonResponse({
+            "success": True,
+            "message": "메모가 성공적으로 저장되었습니다.",
+            "memo": article.memo
+        })
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@login_required
+def api_saved_articles_list(request):
+    """
+    저장된 기사 JSON 목록 (키워드/검색 필터 지원)
+    """
+    keyword_filter = request.GET.get("keyword", "").strip()
+    query = request.GET.get("q", "").strip()
+
+    qs = SavedArticle.objects.all()
+    if keyword_filter:
+        qs = qs.filter(keyword=keyword_filter)
+    if query:
+        qs = qs.filter(
+            models.Q(title__icontains=query) |
+            models.Q(business_implication__icontains=query) |
+            models.Q(memo__icontains=query)
+        )
+
+    articles = []
+    for a in qs.order_by("-created_at"):
+        articles.append({
+            "id": a.id,
+            "keyword": a.keyword,
+            "title": a.title,
+            "origin_url": a.origin_url,
+            "press": a.press,
+            "published_at": a.published_at,
+            "summary_points": a.summary_points,
+            "business_implication": a.business_implication,
+            "memo": a.memo,
+            "created_at": a.created_at.strftime("%Y-%m-%d %H:%M"),
+        })
+
+    return JsonResponse({
+        "success": True,
+        "count": len(articles),
+        "articles": articles
+    })
+
+
+@csrf_exempt
+@login_required
+def api_check_saved_urls(request):
+    """
+    여러 URL의 저장 여부를 일괄 확인하는 API
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            urls = data.get("urls", [])
+        except Exception:
+            urls = []
+
+        saved_urls = list(SavedArticle.objects.filter(origin_url__in=urls).values_list("origin_url", flat=True))
+        return JsonResponse({
+            "success": True,
+            "saved_urls": saved_urls
+        })
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+

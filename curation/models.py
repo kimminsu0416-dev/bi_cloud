@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 from .constants import DEFAULT_KEYWORDS
 
 
@@ -94,3 +95,29 @@ class ApiUsage(models.Model):
             "today_str": today.strftime("%Y-%m-%d"),
             "month_str": today.strftime("%Y년 %m월"),
         }
+
+
+class SavedArticle(models.Model):
+    """
+    사용자가 선택하여 영구 아카이브한 맞춤 뉴스 기사 및 AI 분석 결과
+    """
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="저장한 사용자")
+    keyword = models.CharField(max_length=100, db_index=True, verbose_name="검색 키워드")
+    title = models.CharField(max_length=500, verbose_name="기사 제목")
+    origin_url = models.URLField(max_length=1000, db_index=True, verbose_name="원문 링크")
+    press = models.CharField(max_length=100, blank=True, default="", verbose_name="언론사")
+    published_at = models.CharField(max_length=100, blank=True, default="", verbose_name="기사 발행일")
+    summary_points = models.JSONField(default=list, verbose_name="AI 핵심 요약 (3줄)")
+    business_implication = models.TextField(blank=True, default="", verbose_name="비즈니스 시사점")
+    raw_content = models.TextField(blank=True, default="", verbose_name="기사 원문 요약 스니펫")
+    memo = models.TextField(blank=True, default="", verbose_name="사용자 전략 메모")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="아카이브 일시")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "저장된 기사"
+        verbose_name_plural = "저장된 기사 아카이브"
+
+    def __str__(self):
+        return f"[{self.keyword}] {self.title[:30]}"
+

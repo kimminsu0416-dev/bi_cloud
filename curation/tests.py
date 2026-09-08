@@ -82,3 +82,57 @@ class NewsCurationTestCase(TestCase):
         self.assertEqual(data.get("start_date"), "2026-08-01")
         self.assertEqual(data.get("end_date"), "2026-09-01")
         self.assertEqual(len(data["data"]["results"]), 2)
+
+    def test_saved_article_crud_and_archive(self):
+        """기사 저장, 중복 토글, 메모 수정, 삭제 및 아카이브 페이지 테스트"""
+        # 1. 기사 신규 저장
+        save_payload = {
+            "keyword": "클라우드 보안",
+            "title": "2026 클라우드 보안 신기술 동향",
+            "origin_url": "https://news.example.com/security/101",
+            "press": "전자신문",
+            "published_at": "2026-09-08",
+            "summary_points": ["클라우드 망분리 규제 완화", "제로트러스트 도입 가속", "엔터프라이즈 VDI 수요 급증"],
+            "business_implication": "신규 보안 패키지 솔루션 출시 기회 포착 필요",
+            "memo": "다음 주 전략회의 안건으로 상정 예정"
+        }
+        res = self.client.post(
+            reverse('curation:api_save_article'),
+            data=json.dumps(save_payload),
+            content_type="application/json"
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["success"])
+        self.assertTrue(data["saved"])
+        article_id = data["article_id"]
+
+        # 2. 아카이브 페이지 로드 확인
+        archive_res = self.client.get(reverse('curation:archive'))
+        self.assertEqual(archive_res.status_code, 200)
+        self.assertContains(archive_res, "2026 클라우드 보안 신기술 동향")
+        self.assertContains(archive_res, "클라우드 보안")
+
+        # 3. 저장 여부 일괄 확인 API 테스트
+        check_res = self.client.post(
+            reverse('curation:api_check_saved_urls'),
+            data=json.dumps({"urls": ["https://news.example.com/security/101", "https://other.com"]}),
+            content_type="application/json"
+        )
+        self.assertEqual(check_res.status_code, 200)
+        self.assertIn("https://news.example.com/security/101", check_res.json()["saved_urls"])
+
+        # 4. 메모 수정 테스트
+        memo_res = self.client.post(
+            reverse('curation:api_update_article_memo', args=[article_id]),
+            data=json.dumps({"memo": "수정된 임원 메모 내용입니다."}),
+            content_type="application/json"
+        )
+        self.assertEqual(memo_res.status_code, 200)
+        self.assertEqual(memo_res.json()["memo"], "수정된 임원 메모 내용입니다.")
+
+        # 5. 기사 삭제 테스트
+        del_res = self.client.post(reverse('curation:api_delete_article', args=[article_id]))
+        self.assertEqual(del_res.status_code, 200)
+        self.assertTrue(del_res.json()["success"])
+
