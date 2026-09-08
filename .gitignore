@@ -1,7 +1,17 @@
 # Environment & Secrets
 .env
-.env.local
+.env.*
 *.env
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.secret
+credentials.json
+service_account.json
+*.log
+*.bak
 
 # Python-generated files
 __pycache__/
