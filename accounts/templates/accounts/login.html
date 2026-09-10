@@ -61,8 +61,26 @@
         </button>
       </form>
 
+      <!-- Sign-up CTA Section -->
+      <div class="pt-4 border-t border-zinc-800/80 text-center space-y-3">
+        <p class="text-xs text-zinc-400">
+          아직 계정이 없으신가요?
+          <a href="{% url 'accounts:register' %}" class="text-white font-bold hover:underline ml-1 underline-offset-4">
+            무료 회원가입하기 →
+          </a>
+        </p>
+
+        <!-- Master Admin Quick Helper (For ethan@ncomputing.com) -->
+        <div class="pt-2">
+          <button type="button" onclick="fillAdminCredentials()" class="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition flex items-center justify-center gap-1.5 mx-auto bg-zinc-900/60 px-2.5 py-1 rounded-md border border-zinc-800 hover:border-zinc-700">
+            <span>👑</span>
+            <span>최고관리자(ethan@ncomputing.com) 빠른 입력</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Enterprise Security Notice -->
-      <div class="pt-2 text-center">
+      <div class="pt-1 text-center">
         <p class="text-xs text-zinc-500 flex items-center justify-center gap-1.5">
           <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -73,7 +91,6 @@
 
     </div>
 
-
     <!-- SaaS Footer -->
     <div class="text-center text-xs text-zinc-600 font-mono">
       Enterprise Business Intelligence Cloud Engine
@@ -81,4 +98,16 @@
 
   </div>
 </div>
+
+<script>
+  function fillAdminCredentials() {
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    if (userInput) userInput.value = 'ethan@ncomputing.com';
+    if (passInput) {
+      passInput.value = 'ncom1234';
+      passInput.focus();
+    }
+  }
+</script>
 {% endblock %}

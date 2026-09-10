@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}최고관리자 통계 패널 | BI CLOUD SaaS{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/exchange.css' %}">
+<style>
+  .kpi-card {
+    background: linear-gradient(135deg, rgba(24, 24, 27, 0.7) 0%, rgba(18, 18, 21, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .kpi-card:hover {
+    border-color: rgba(20, 184, 166, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.8), 0 0 20px -5px rgba(20, 184, 166, 0.15);
+  }
+  .data-row:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+
+  <!-- Executive Header & Quick Actions -->
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between pb-6 border-b border-zinc-800 gap-6">
+    <div class="space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-xs font-mono text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>EXECUTIVE ADMIN INTELLIGENCE</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white flex items-center gap-3">
+        <span>최고관리자 총괄 패널</span>
+        <span class="text-xs px-2.5 py-1 font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-lg">Master Console</span>
+      </h1>
+      <p class="text-sm text-zinc-400">
+        플랫폼의 회원 가입 추이와 누적된 인텔리전스 빅데이터 현황을 실시간으로 종합 관제합니다.
+      </p>
+    </div>
+
+    <!-- Quick Navigation Hub -->
+    <div class="flex flex-wrap items-center gap-2.5 self-start lg:self-auto">
+      <a href="{% url 'accounts:user_management' %}" class="px-4 py-2.5 bw-btn-secondary text-xs font-semibold flex items-center gap-2 hover:border-zinc-500 transition">
+        <span>👥</span>
+        <span>회원/승인 관리</span>
+        {% if pending_users > 0 %}
+        <span class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-900 text-amber-300 rounded-full font-mono">{{ pending_users }}</span>
+        {% endif %}
+      </a>
+      <a href="/archive/" class="px-4 py-2.5 bw-btn-secondary text-xs font-semibold flex items-center gap-2 hover:border-zinc-500 transition">
+        <span>📁</span>
+        <span>전체 아카이브</span>
+      </a>
+      <a href="/" class="px-4 py-2.5 bw-btn-primary text-xs font-bold flex items-center gap-1.5 shadow-md shadow-white/10 transition">
+        <span>📰</span>
+        <span>AI 큐레이션 실행</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Performance Indicators (KPI Grid) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    
+    <!-- KPI 1: 총 회원 수 -->
+    <div class="kpi-card p-6 rounded-2xl relative overflow-hidden group">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
+      <div class="flex items-center justify-between text-xs text-zinc-400 font-mono mb-3">
+        <span>TOTAL MEMBERS</span>
+        <div class="w-8 h-8 rounded-xl bg-blue-950/60 border border-blue-800/60 flex items-center justify-center text-blue-400 text-sm">
+          👥
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="text-4xl font-black font-mono tracking-tight text-white">{{ total_users }}</span>
+        <span class="text-xs text-zinc-400 font-medium">명 가입</span>
+      </div>
+      <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+        <span class="text-emerald-400 font-medium flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>정상 활성 {{ active_users }}명</span>
+        </span>
+        <span class="text-amber-400 font-medium flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          <span>승인 대기 {{ pending_users }}명</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI 2: 우리가 가진 전체 데이터 개수 -->
+    <div class="kpi-card p-6 rounded-2xl relative overflow-hidden group">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+      <div class="flex items-center justify-between text-xs text-zinc-400 font-mono mb-3">
+        <span>TOTAL ASSETS</span>
+        <div class="w-8 h-8 rounded-xl bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 text-sm">
+          🗄️
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="text-4xl font-black font-mono tracking-tight text-white">{{ total_all_data }}</span>
+        <span class="text-xs text-zinc-400 font-medium">건 누적</span>
+      </div>
+      <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+        <span class="text-zinc-300 font-medium">
+          기사 아카이브 <strong class="text-white font-mono">{{ total_articles }}</strong>건
+        </span>
+        <span class="text-zinc-400 font-medium">
+          키워드 <strong class="text-white font-mono">{{ total_keywords }}</strong>개
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI 3: AI 인텔리전스 API 통계 -->
+    <div class="kpi-card p-6 rounded-2xl relative overflow-hidden group">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-purple-500/20 transition-all"></div>
+      <div class="flex items-center justify-between text-xs text-zinc-400 font-mono mb-3">
+        <span>MONTHLY API USAGE</span>
+        <div class="w-8 h-8 rounded-xl bg-purple-950/60 border border-purple-800/60 flex items-center justify-center text-purple-400 text-sm">
+          ⚡
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="text-4xl font-black font-mono tracking-tight text-white">{{ api_stats.monthly_count|default:0 }}</span>
+        <span class="text-xs text-zinc-400 font-medium">회 호출</span>
+      </div>
+      <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+        <span class="text-zinc-300 font-medium">
+          금일 호출 <strong class="text-white font-mono">{{ api_stats.daily_count|default:0 }}</strong>회
+        </span>
+        <span class="text-emerald-400 font-medium">
+          잔여한도 {{ api_stats.daily_remaining }}
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI 4: 보안 및 승인 큐 상태 -->
+    <div class="kpi-card p-6 rounded-2xl relative overflow-hidden group">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
+      <div class="flex items-center justify-between text-xs text-zinc-400 font-mono mb-3">
+        <span>SECURITY & ACCESS</span>
+        <div class="w-8 h-8 rounded-xl bg-amber-950/60 border border-amber-800/60 flex items-center justify-center text-amber-400 text-sm">
+          🛡️
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="text-4xl font-black font-mono tracking-tight {% if pending_users > 0 %}text-amber-400{% else %}text-emerald-400{% endif %}">
+          {{ pending_users }}
+        </span>
+        <span class="text-xs text-zinc-400 font-medium">건 대기중</span>
+      </div>
+      <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+        <span class="text-zinc-300 font-medium">
+          운영진 <strong class="text-white font-mono">{{ staff_users }}</strong>명
+        </span>
+        {% if pending_users > 0 %}
+        <span class="text-amber-300 font-bold font-mono animate-pulse">승인 필요</span>
+        {% else %}
+        <span class="text-emerald-400 font-bold font-mono">정상 보호중</span>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Main Section: Recent 20 Created Data Records -->
+  <div class="space-y-6">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            최근 생성된 데이터 20건 (작성자 및 상세 내용)
+          </h2>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-zinc-800 text-emerald-400 border border-zinc-700">
+            RECENT 20
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-1">
+          사용자가 플랫폼에서 생성/저장한 최신 아카이브 데이터와 AI 분석 결과를 실시간으로 모니터링합니다.
+        </p>
+      </div>
+
+      <!-- Quick Search / Filter Input -->
+      <div class="relative w-full sm:w-72">
+        <input type="text" id="articleFilterInput" onkeyup="filterArticles()" 
+          placeholder="작성자, 키워드, 제목 검색..." 
+          class="w-full px-4 py-2 pl-9 bw-input text-xs text-white placeholder-zinc-500">
+        <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Data Feed List -->
+    {% if recent_articles %}
+    <div class="space-y-3" id="articleListContainer">
+      {% for item in recent_articles %}
+      <div class="bw-card p-5 space-y-3 data-article-card transition-all hover:border-zinc-700" 
+        data-search="{{ item.user.first_name|default:item.user.username }} {{ item.user.email }} {{ item.keyword }} {{ item.title }}">
+        
+        <!-- Header Row: Author Badge, Keyword, Press & Timestamp -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 pb-2 border-b border-zinc-800/60 text-xs">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Author Badge -->
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800">
+              <span class="text-sm">✍️</span>
+              <span class="text-zinc-400">작성자:</span>
+              <strong class="text-white font-medium">
+                {{ item.user.first_name|default:item.user.username|default:"시스템/익명" }}
+              </strong>
+              {% if item.user %}
+              <span class="text-[10px] font-mono text-zinc-500">({{ item.user.email }})</span>
+              {% if item.user.email == 'ethan@ncomputing.com' %}
+              <span class="px-1.5 py-0.2 text-[9px] bg-emerald-950 text-emerald-300 font-bold rounded border border-emerald-800">Master</span>
+              {% endif %}
+              {% endif %}
+            </div>
+
+            <!-- Keyword Badge -->
+            <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-950/60 text-blue-300 border border-blue-800/60 flex items-center gap-1">
+              <span>🏷️</span>
+              <span>{{ item.keyword }}</span>
+            </span>
+
+            <!-- Press Badge -->
+            {% if item.press %}
+            <span class="px-2 py-1 rounded-lg text-xs font-mono text-zinc-400 bg-zinc-900 border border-zinc-800">
+              {{ item.press }}
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Timestamp -->
+          <div class="text-xs font-mono text-zinc-500 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>{{ item.created_at|date:"Y-m-d H:i" }}</span>
+          </div>
+        </div>
+
+        <!-- Article Title & Link -->
+        <div class="flex items-start justify-between gap-4">
+          <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition leading-snug">
+            {{ item.title }}
+          </h3>
+          {% if item.origin_url %}
+          <a href="{{ item.origin_url }}" target="_blank" rel="noopener noreferrer" 
+            class="px-2.5 py-1 text-xs font-semibold bw-btn-secondary flex items-center gap-1 whitespace-nowrap hover:text-white transition flex-shrink-0" title="원문 기사 열기">
+            <span>원문</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+          {% endif %}
+        </div>
+
+        <!-- Content Details: AI Summary & Business Implication -->
+        <div class="space-y-2 pt-1 text-xs">
+          
+          <!-- Summary Points -->
+          {% if item.summary_points %}
+          <div class="p-3 bg-zinc-900/80 rounded-xl border border-zinc-800/80 space-y-1">
+            <span class="text-[11px] font-mono font-bold text-zinc-400 uppercase flex items-center gap-1.5 mb-1.5">
+              <span>📌</span>
+              <span>AI 핵심 요약 (3줄)</span>
+            </span>
+            <ul class="space-y-1 text-zinc-300 pl-4 list-disc marker:text-emerald-400">
+              {% for point in item.summary_points %}
+              <li>{{ point }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          <!-- Business Implication -->
+          {% if item.business_implication %}
+          <div class="p-3 bg-emerald-950/20 rounded-xl border border-emerald-900/40 text-emerald-200 space-y-1">
+            <span class="text-[11px] font-mono font-bold text-emerald-400 uppercase flex items-center gap-1.5">
+              <span>💡</span>
+              <span>비즈니스 시사점 및 전략 가이드</span>
+            </span>
+            <p class="leading-relaxed pl-1">{{ item.business_implication }}</p>
+          </div>
+          {% endif %}
+
+          <!-- User Memo -->
+          {% if item.memo %}
+          <div class="p-2.5 bg-zinc-900/50 rounded-xl border border-zinc-800/60 text-zinc-400">
+            <span class="font-semibold text-zinc-300">사용자 메모:</span> {{ item.memo }}
+          </div>
+          {% endif %}
+
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bw-card p-12 text-center space-y-3">
+      <div class="text-4xl">📭</div>
+      <h3 class="text-lg font-bold text-white">아직 생성된 아카이브 데이터가 없습니다</h3>
+      <p class="text-xs text-zinc-400 max-w-sm mx-auto">
+        메인 대시보드에서 AI 뉴스 큐레이션을 실행한 후 관심 있는 기사를 아카이브에 저장하면 이곳에 실시간으로 집계됩니다.
+      </p>
+      <div class="pt-2">
+        <a href="/" class="px-4 py-2 bw-btn-primary text-xs font-bold inline-flex items-center gap-2">
+          <span>뉴스 큐레이션 하러가기 →</span>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function filterArticles() {
+    const query = document.getElementById('articleFilterInput').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.data-article-card');
+    
+    cards.forEach(card => {
+      const searchData = card.getAttribute('data-search').toLowerCase();
+      if (!query || searchData.includes(query)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>
+{% endblock %}

@@ -2,6 +2,11 @@
 
 {% block title %}팀원 및 사용자 계정 관리 | BI CLOUD SaaS{% endblock %}
 
+{% block extra_head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/exchange.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
   
@@ -15,7 +20,7 @@
         사용자 & 팀원 계정 관리
       </h1>
       <p class="text-sm text-zinc-400">
-        동료 직원이나 외부 파트너가 SaaS 서비스를 이용할 수 있도록 새로운 로그인 계정을 발급하고 관리합니다.
+        신규 가입 고객 및 동료의 이용 권한(운영자/일반회원)과 계정 활성화 상태를 한눈에 통제합니다.
       </p>
     </div>
 
@@ -25,15 +30,37 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      <span>새 계정 발급 (초대)</span>
+      <span>새 계정 직접 발급</span>
     </button>
   </div>
+
+  <!-- Pending Approval Alert Banner -->
+  {% if pending_count > 0 %}
+  <div class="p-4 bg-amber-950/40 border border-amber-800/80 rounded-2xl flex items-center justify-between gap-4 shadow-lg shadow-amber-950/20">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-amber-900/60 border border-amber-700/60 flex items-center justify-center text-lg">
+        ⏳
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-amber-200">
+          신규 회원가입 승인 대기 (총 <span class="font-mono text-white text-base">{{ pending_count }}</span>명)
+        </h4>
+        <p class="text-xs text-amber-300/80">
+          대표님의 승인을 기다리는 가입 신청이 있습니다. 아래 목록에서 <strong class="text-white font-semibold">[✅ 가입 승인]</strong> 버튼을 누르면 즉시 로그인이 허가됩니다.
+        </p>
+      </div>
+    </div>
+    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-900/80 text-amber-200 border border-amber-700 animate-pulse">
+      승인 필요
+    </span>
+  </div>
+  {% endif %}
 
   <!-- Users Table Section -->
   <div class="space-y-4">
     <div class="flex items-center justify-between text-xs text-zinc-400">
       <span>등록된 사용자 목록 (총 <strong class="text-white font-mono" id="userCount">{{ user_list|length }}</strong>명)</span>
-      <span class="font-mono text-zinc-500">Master Console</span>
+      <span class="font-mono text-zinc-500">Master Console Active</span>
     </div>
 
     <div class="bw-table-wrapper">
@@ -41,21 +68,22 @@
         <table class="bw-table text-left" id="userTable">
           <thead>
             <tr>
-              <th>이름 / 아이디</th>
+              <th>이름 / 호칭</th>
               <th>로그인 이메일</th>
-              <th>권한 레벨</th>
+              <th>권한 등급</th>
+              <th>계정 상태</th>
               <th>가입일시</th>
               <th class="text-right">관리 기능</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-800/60" id="userTableBody">
             {% for u in user_list %}
-            <tr id="user-row-{{ u.id }}">
+            <tr id="user-row-{{ u.id }}" class="{% if not u.is_active %}bg-amber-950/10{% endif %}">
               <td>
                 <div class="font-bold text-white flex items-center gap-2">
                   <span>{{ u.first_name|default:u.username }}</span>
                   {% if u.id == request.user.id %}
-                  <span class="px-2 py-0.5 text-[10px] bg-zinc-800 text-emerald-400 rounded-full font-mono font-bold border border-emerald-900/50">본인</span>
+                  <span class="px-2 py-0.5 text-[10px] bg-zinc-800 text-emerald-400 rounded-full font-mono font-bold border border-emerald-900/50">접속중</span>
                   {% endif %}
                 </div>
               </td>
@@ -63,33 +91,66 @@
                 <span class="font-mono text-zinc-300">{{ u.email|default:u.username }}</span>
               </td>
               <td>
-                {% if u.is_superuser %}
-                <span class="px-2.5 py-1 text-xs font-bold font-mono rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
-                  마스터 관리자
+                {% if u.is_superuser or u.email == 'ethan@ncomputing.com' %}
+                <span class="px-2.5 py-1 text-xs font-bold font-mono rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 flex items-center gap-1.5 w-fit">
+                  <span>👑</span>
+                  <span>최고관리자 (Master)</span>
                 </span>
                 {% elif u.is_staff %}
-                <span class="px-2.5 py-1 text-xs font-bold font-mono rounded-md bg-blue-950/80 text-blue-300 border border-blue-800/60">
-                  운영자
+                <span id="role-badge-{{ u.id }}" class="px-2.5 py-1 text-xs font-bold font-mono rounded-md bg-blue-950/80 text-blue-300 border border-blue-800/60">
+                  운영자 (Staff)
                 </span>
                 {% else %}
-                <span class="px-2.5 py-1 text-xs font-medium font-mono rounded-md bg-zinc-800 text-zinc-300">
-                  일반 멤버
+                <span id="role-badge-{{ u.id }}" class="px-2.5 py-1 text-xs font-medium font-mono rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
+                  일반 회원 (Standard)
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.is_active %}
+                <span id="status-badge-{{ u.id }}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-900/50">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>정상 활성</span>
+                </span>
+                {% else %}
+                <span id="status-badge-{{ u.id }}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-800">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                  <span>⏳ 승인 대기</span>
                 </span>
                 {% endif %}
               </td>
               <td class="font-mono text-xs text-zinc-400">
                 {{ u.date_joined|date:"Y-m-d H:i" }}
               </td>
-              <td class="text-right space-x-2">
-                <button type="button" onclick="openResetPasswordModal({{ u.id }}, '{{ u.email|default:u.username }}')" 
-                  class="px-3 py-1.5 text-xs font-medium bw-btn-secondary hover:text-white transition">
-                  비밀번호 초기화
-                </button>
-                {% if u.id != request.user.id %}
-                <button type="button" onclick="deleteUser({{ u.id }}, '{{ u.email|default:u.username }}')" 
-                  class="px-3 py-1.5 text-xs font-medium bg-red-950/40 text-red-400 hover:bg-red-900/80 hover:text-white rounded-lg border border-red-900/50 transition">
-                  삭제
-                </button>
+              <td class="text-right space-x-1.5 whitespace-nowrap">
+                {% if u.is_superuser or u.email == 'ethan@ncomputing.com' %}
+                <span class="text-xs text-zinc-500 font-mono px-3 py-1 bg-zinc-900/80 rounded-lg border border-zinc-800">
+                  🔒 영구 보호
+                </span>
+                {% else %}
+                  <!-- 가입 승인 / 일시정지 토글 버튼 -->
+                  <button type="button" id="status-btn-{{ u.id }}" onclick="toggleUserActive({{ u.id }}, '{{ u.email|default:u.username }}', {{ u.is_active|yesno:'true,false' }})" 
+                    class="px-2.5 py-1 text-xs font-bold {% if not u.is_active %}bg-emerald-600 text-white hover:bg-emerald-500 shadow-md shadow-emerald-900/30{% else %}bg-amber-950/40 text-amber-400 hover:bg-amber-900/60 border border-amber-900/40{% endif %} rounded-lg transition" title="가입 승인 또는 계정 일시정지">
+                    {% if not u.is_active %}✅ 가입 승인{% else %}일시정지{% endif %}
+                  </button>
+
+                  <!-- 권한 변경 버튼 -->
+                  <button type="button" id="role-btn-{{ u.id }}" onclick="toggleUserRole({{ u.id }}, '{{ u.email|default:u.username }}', {{ u.is_staff|yesno:'true,false' }})" 
+                    class="px-2.5 py-1 text-xs font-medium bw-btn-secondary hover:text-white transition" title="권한 변경">
+                    {% if u.is_staff %}일반회원으로 강등{% else %}운영자로 승격{% endif %}
+                  </button>
+
+                  <!-- 비밀번호 초기화 -->
+                  <button type="button" onclick="openResetPasswordModal({{ u.id }}, '{{ u.email|default:u.username }}')" 
+                    class="px-2.5 py-1 text-xs font-medium bw-btn-secondary hover:text-white transition" title="비밀번호 초기화">
+                    비번재설정
+                  </button>
+
+                  <!-- 삭제 -->
+                  <button type="button" onclick="deleteUser({{ u.id }}, '{{ u.email|default:u.username }}')" 
+                    class="px-2.5 py-1 text-xs font-medium bg-red-950/40 text-red-400 hover:bg-red-900/80 hover:text-white rounded-lg border border-red-900/50 transition" title="계정 삭제">
+                    삭제
+                  </button>
                 {% endif %}
               </td>
             </tr>
@@ -262,6 +323,56 @@
         closeResetPasswordModal();
       } else {
         alert('실패: ' + data.message);
+      }
+    } catch (err) {
+      alert('오류가 발생했습니다: ' + err.message);
+    }
+  }
+
+  async function toggleUserRole(userId, email, currentIsStaff) {
+    const actionText = currentIsStaff ? '일반 회원으로 변경' : '운영자(Staff)로 승격';
+    if (!confirm(`'${email}' 님의 권한을 [${actionText}] 하시겠습니까?`)) return;
+
+    try {
+      const toggleUrl = "{% url 'accounts:toggle_role_api' 0 %}".replace('0', userId);
+      const res = await fetch(toggleUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        location.reload();
+      } else {
+        alert('권한 변경 실패: ' + data.message);
+      }
+    } catch (err) {
+      alert('오류가 발생했습니다: ' + err.message);
+    }
+  }
+
+  async function toggleUserActive(userId, email, currentIsActive) {
+    const actionText = currentIsActive ? '계정 일시정지(이용제한)' : '회원가입 승인(로그인 허용)';
+    if (!confirm(`'${email}' 님에 대해 [${actionText}]을 진행하시겠습니까?`)) return;
+
+    try {
+      const toggleUrl = "{% url 'accounts:toggle_active_api' 0 %}".replace('0', userId);
+      const res = await fetch(toggleUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        location.reload();
+      } else {
+        alert('상태 변경 실패: ' + data.message);
       }
     } catch (err) {
       alert('오류가 발생했습니다: ' + err.message);
