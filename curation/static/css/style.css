@@ -1486,3 +1486,20 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* SaaS Global Header Navigation Protection (단어/음절 줄바꿈 원천 방지) */
+header nav {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+header nav a {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    flex-shrink: 0 !important;
+}
+header nav a span {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    display: inline-block;
+}
+

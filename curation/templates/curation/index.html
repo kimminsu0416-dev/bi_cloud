@@ -10,52 +10,56 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="antialiased">
-    <!-- SaaS Global Navigation Bar -->
-    <header style="background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; padding: 0.75rem 2rem;">
-        <div style="max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 2rem;">
-                <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em;">
-                    <div style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900;">BI</div>
+    <!-- SaaS Global Navigation Bar (줄바꿈 방지 및 컴팩트 레이아웃 최적화) -->
+    <header style="background: rgba(14, 14, 18, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; padding: 0.55rem 1.25rem;">
+        <div style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+            <!-- 좌측: 로고 & 메인 메뉴 -->
+            <div style="display: flex; align-items: center; gap: 1rem; flex-shrink: 0;">
+                <a href="/" style="display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em; flex-shrink: 0; white-space: nowrap;">
+                    <div style="width: 1.85rem; height: 1.85rem; border-radius: 0.45rem; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900;">BI</div>
                     <div style="display: flex; flex-direction: column;">
-                        <span>BI CLOUD <span style="font-size: 0.65rem; font-family: monospace; background: #27272a; color: #a1a1aa; padding: 2px 6px; border-radius: 4px; border: 1px solid #3f3f46;">SaaS</span></span>
-                        <span style="font-size: 0.65rem; font-family: monospace; color: #71717a; display: flex; align-items: center; gap: 4px; font-weight: 500; margin-top: 1px;">
-                            by <img src="/static/img/ethan_labs_logo.png" style="width: 11px; height: 11px; border-radius: 2px; vertical-align: middle;" alt="Ethan Labs"> Ethan Labs
+                        <span>BI CLOUD <span style="font-size: 0.6rem; font-family: monospace; background: #27272a; color: #a1a1aa; padding: 1px 5px; border-radius: 3px; border: 1px solid #3f3f46;">SaaS</span></span>
+                        <span style="font-size: 0.62rem; font-family: monospace; color: #71717a; display: flex; align-items: center; gap: 3px; font-weight: 500; margin-top: 1px;">
+                            by <img src="/static/img/ethan_labs_logo.png" style="width: 10px; height: 10px; border-radius: 2px; vertical-align: middle;" alt="Ethan Labs"> Ethan Labs
                         </span>
                     </div>
                 </a>
-                <nav style="display: flex; gap: 0.5rem; background: #18181b; padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-                    <a href="/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 700; text-decoration: none; background: #fff; color: #000; display: flex; align-items: center; gap: 0.4rem;">
-                        <span>📰</span> <span>AI 뉴스 큐레이션</span>
+
+                <!-- 메인 네비게이션 탭 (white-space: nowrap & word-break: keep-all 필수 적용) -->
+                <nav style="display: flex; align-items: center; gap: 0.35rem; background: #18181b; padding: 3px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; white-space: nowrap;">
+                    <a href="/" style="padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.76rem; font-weight: 700; text-decoration: none; background: #fff; color: #000; display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
+                        <span>📰</span> <span style="white-space: nowrap;">AI 뉴스 큐레이션</span>
                     </a>
-                    <a href="/archive/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
-                        <span>📁</span> <span>저장된 기사 아카이브</span>
+                    <a href="/archive/" style="padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.76rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
+                        <span>📁</span> <span style="white-space: nowrap;">저장된 기사 아카이브</span>
                     </a>
-                    <a href="/exchange/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
-                        <span>💱</span> <span>실시간 환율 정보</span>
+                    <a href="/exchange/" style="padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.76rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
+                        <span>💱</span> <span style="white-space: nowrap;">실시간 환율 정보</span>
                     </a>
                     {% if user.email == 'ethan@ncomputing.com' or user.username == 'ethan@ncomputing.com' %}
-                    <a href="{% url 'accounts:admin_dashboard' %}" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: #34d399; border: 1px solid rgba(16,185,129,0.3); background: rgba(6,78,59,0.4); display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;">
-                        <span>⚡</span> <span>관리자 패널</span>
+                    <a href="{% url 'accounts:admin_dashboard' %}" style="padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.76rem; font-weight: 700; text-decoration: none; color: #34d399; border: 1px solid rgba(16,185,129,0.3); background: rgba(6,78,59,0.4); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
+                        <span>⚡</span> <span style="white-space: nowrap;">관리자 패널</span>
                     </a>
                     {% endif %}
                     {% if user.is_staff or user.is_superuser %}
-                    <a href="{% url 'accounts:user_management' %}" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
-                        <span>👥</span> <span>사용자/팀 관리</span>
+                    <a href="{% url 'accounts:user_management' %}" style="padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.76rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
+                        <span>👥</span> <span style="white-space: nowrap;">사용자/팀 관리</span>
                     </a>
                     {% endif %}
                 </nav>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; background: #18181b; border: 1px solid rgba(255,255,255,0.08); padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.8rem; font-family: monospace; color: #d4d4d8;">
-                    <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34d399;"></span>
-                    <span>{{ user.email|default:user.username }}</span>
+            <!-- 우측: 사용자 계정 및 기능 버튼 (white-space: nowrap) -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; white-space: nowrap;">
+                <div style="display: flex; align-items: center; gap: 0.4rem; background: #18181b; border: 1px solid rgba(255,255,255,0.08); padding: 0.3rem 0.65rem; border-radius: 7px; font-size: 0.75rem; font-family: monospace; color: #d4d4d8; white-space: nowrap; flex-shrink: 0;">
+                    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34d399; flex-shrink: 0;"></span>
+                    <span style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">{{ user.email|default:user.username }}</span>
                 </div>
-                <a href="{% url 'accounts:change_password' %}" title="비밀번호 변경" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; font-weight: 600; text-decoration: none; background: #18181b; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; display: flex; align-items: center; gap: 0.3rem;">
-                    <span>🔑</span> <span>비밀번호 변경</span>
+                <a href="{% url 'accounts:change_password' %}" title="비밀번호 변경" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; font-weight: 600; text-decoration: none; background: #18181b; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
+                    <span>🔑</span> <span style="white-space: nowrap;">비밀번호 변경</span>
                 </a>
-                <a href="{% url 'accounts:logout' %}" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; text-decoration: none; background: #27272a; color: #f87171; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;">
-                    로그아웃
+                <a href="{% url 'accounts:logout' %}" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: #27272a; color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 7px; white-space: nowrap; word-break: keep-all; flex-shrink: 0; display: inline-flex; align-items: center;">
+                    <span style="white-space: nowrap;">로그아웃</span>
                 </a>
             </div>
         </div>
