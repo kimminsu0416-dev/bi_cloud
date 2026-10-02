@@ -49,18 +49,46 @@
                 </nav>
             </div>
 
-            <!-- 우측: 사용자 계정 및 기능 버튼 (white-space: nowrap) -->
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; white-space: nowrap;">
-                <div style="display: flex; align-items: center; gap: 0.4rem; background: #18181b; border: 1px solid rgba(255,255,255,0.08); padding: 0.3rem 0.65rem; border-radius: 7px; font-size: 0.75rem; font-family: monospace; color: #d4d4d8; white-space: nowrap; flex-shrink: 0;">
+            <!-- 우측: 사용자 계정 프로필 드롭다운 (제일 우측 배치) -->
+            <div style="position: relative; display: flex; align-items: center; flex-shrink: 0;">
+                <button type="button" id="mainUserDropdownBtn" onclick="toggleMainUserDropdown()" 
+                    style="display: flex; align-items: center; gap: 0.5rem; background: #18181b; border: 1px solid rgba(255,255,255,0.12); padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.75rem; font-family: monospace; color: #f4f4f5; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
                     <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34d399; flex-shrink: 0;"></span>
-                    <span style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;">{{ user.email|default:user.username }}</span>
+                    <span style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; font-weight: 600;">{{ user.email|default:user.username }}</span>
+                    <svg id="mainUserDropdownArrow" style="width: 12px; height: 12px; color: #a1a1aa; transition: transform 0.2s; margin-left: 2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <!-- 드롭다운 메뉴 레이어 -->
+                <div id="mainUserDropdownMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 220px; background: rgba(18, 18, 22, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.8); z-index: 1000; overflow: hidden;">
+                    <!-- 사용자 정보 헤더 -->
+                    <div style="padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                        <div style="font-size: 0.68rem; color: #71717a; font-family: sans-serif;">접속 계정</div>
+                        <div style="font-size: 0.78rem; font-family: monospace; color: #ffffff; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">{{ user.email|default:user.username }}</div>
+                        <div style="margin-top: 4px;">
+                            {% if user.is_superuser or user.email == 'ethan@ncomputing.com' %}
+                            <span style="font-size: 0.62rem; font-weight: 700; background: rgba(6,78,59,0.5); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); padding: 1px 6px; border-radius: 4px;">Master Admin</span>
+                            {% elif user.is_staff %}
+                            <span style="font-size: 0.62rem; font-weight: 700; background: rgba(30,58,138,0.5); color: #93c5fd; border: 1px solid rgba(59,130,246,0.4); padding: 1px 6px; border-radius: 4px;">Staff</span>
+                            {% else %}
+                            <span style="font-size: 0.62rem; font-weight: 600; background: #27272a; color: #d4d4d8; border: 1px solid #3f3f46; padding: 1px 6px; border-radius: 4px;">Standard</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 액션 링크 목록 -->
+                    <div style="padding: 0.35rem 0;">
+                        <a href="{% url 'accounts:change_password' %}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; font-size: 0.78rem; color: #e4e4e7; text-decoration: none; transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <span>🔑</span>
+                            <span>비밀번호 변경</span>
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; font-size: 0.78rem; color: #f87171; text-decoration: none; transition: background 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.12)'" onmouseout="this.style.background='transparent'">
+                            <span>🚪</span>
+                            <span style="font-weight: 600;">로그아웃</span>
+                        </a>
+                    </div>
                 </div>
-                <a href="{% url 'accounts:change_password' %}" title="비밀번호 변경" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; font-weight: 600; text-decoration: none; background: #18181b; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap; word-break: keep-all; flex-shrink: 0;">
-                    <span>🔑</span> <span style="white-space: nowrap;">비밀번호 변경</span>
-                </a>
-                <a href="{% url 'accounts:logout' %}" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: #27272a; color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 7px; white-space: nowrap; word-break: keep-all; flex-shrink: 0; display: inline-flex; align-items: center;">
-                    <span style="white-space: nowrap;">로그아웃</span>
-                </a>
             </div>
         </div>
     </header>
@@ -547,5 +575,32 @@ NAVER_CLIENT_SECRET=your_client_secret</code></pre>
         {{ usage_stats_json|safe }}
     </script>
     <script src="/static/js/app.js"></script>
+    <script>
+        function toggleMainUserDropdown() {
+            const menu = document.getElementById('mainUserDropdownMenu');
+            const arrow = document.getElementById('mainUserDropdownArrow');
+            if (menu) {
+                const isHidden = menu.style.display === 'none' || menu.style.display === '';
+                if (isHidden) {
+                    menu.style.display = 'block';
+                    if (arrow) arrow.style.transform = 'rotate(180deg)';
+                } else {
+                    menu.style.display = 'none';
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        // 바깥 영역 클릭 시 드롭다운 닫기
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('mainUserDropdownBtn');
+            const menu = document.getElementById('mainUserDropdownMenu');
+            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = 'none';
+                const arrow = document.getElementById('mainUserDropdownArrow');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+            }
+        });
+    </script>
 </body>
 </html>
