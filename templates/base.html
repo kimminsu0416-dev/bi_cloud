@@ -124,6 +124,10 @@
                 BI CLOUD
                 <span class="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-800 text-zinc-300 rounded border border-zinc-700">SaaS</span>
               </span>
+              <span class="text-[10px] font-mono text-zinc-500 flex items-center gap-1 leading-none mt-0.5">
+                by <img src="{% static 'img/ethan_labs_logo.png' %}" class="w-3 h-3 rounded object-contain inline-block" alt="Ethan Labs">
+                <span class="hover:text-zinc-300 transition-colors">Ethan Labs</span>
+              </span>
             </div>
           </a>
 
@@ -211,6 +215,30 @@
   <main class="flex-1">
     {% block content %}{% endblock %}
   </main>
+
+  {% if user.is_authenticated %}
+  <!-- Authenticated Global Footer: Ethan Labs Signature -->
+  <footer class="mt-auto border-t border-zinc-900/90 bg-zinc-950/70 backdrop-blur-md py-5 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      
+      <!-- Ethan Labs Signature (Exact Attached Design) -->
+      <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800/80 hover:border-zinc-700/80 transition-all shadow-sm group">
+        <img src="{% static 'img/ethan_labs_logo.png' %}" alt="Ethan Labs" class="w-6 h-6 rounded-lg object-contain shadow-sm group-hover:scale-105 transition-transform">
+        <span class="text-xs sm:text-sm text-zinc-300 font-medium tracking-tight">
+          Developed &amp; Engineered by <span class="font-bold text-white underline decoration-dotted decoration-zinc-400 underline-offset-4">Ethan Labs</span>
+        </span>
+      </div>
+
+      <!-- System Meta & Copyright -->
+      <div class="flex items-center gap-3 text-xs font-mono text-zinc-500">
+        <span>BI CLOUD SaaS</span>
+        <span class="text-zinc-800">•</span>
+        <span>Enterprise Intelligence Platform</span>
+      </div>
+
+    </div>
+  </footer>
+  {% endif %}
 
   {% block extra_js %}{% endblock %}
 </body>

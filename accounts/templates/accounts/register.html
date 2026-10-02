@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}회원가입 | BI CLOUD SaaS{% endblock %}
 
@@ -130,9 +131,15 @@
 
     </div>
 
-    <!-- Footer -->
-    <div class="text-center text-xs text-zinc-600 font-mono">
-      BI CLOUD Intelligence Engine · Standard Free Tier Available
+    <!-- Footer & Ethan Labs Signature -->
+    <div class="pt-2 flex flex-col items-center justify-center gap-2.5">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700/80 transition-all text-xs text-zinc-400 shadow-sm group">
+        <img src="{% static 'img/ethan_labs_logo.png' %}" alt="Ethan Labs" class="w-5 h-5 rounded-md object-contain shadow-sm group-hover:scale-105 transition-transform">
+        <span class="font-medium tracking-tight">Developed &amp; Engineered by <span class="font-bold text-zinc-200 underline decoration-dotted decoration-zinc-500 underline-offset-4">Ethan Labs</span></span>
+      </div>
+      <div class="text-center text-[11px] text-zinc-600 font-mono">
+        BI CLOUD Intelligence Engine · Standard Free Tier Available
+      </div>
     </div>
 
   </div>

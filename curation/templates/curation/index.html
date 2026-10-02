@@ -16,7 +16,12 @@
             <div style="display: flex; align-items: center; gap: 2rem;">
                 <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em;">
                     <div style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900;">BI</div>
-                    <span>BI CLOUD <span style="font-size: 0.65rem; font-family: monospace; background: #27272a; color: #a1a1aa; padding: 2px 6px; border-radius: 4px; border: 1px solid #3f3f46;">SaaS</span></span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span>BI CLOUD <span style="font-size: 0.65rem; font-family: monospace; background: #27272a; color: #a1a1aa; padding: 2px 6px; border-radius: 4px; border: 1px solid #3f3f46;">SaaS</span></span>
+                        <span style="font-size: 0.65rem; font-family: monospace; color: #71717a; display: flex; align-items: center; gap: 4px; font-weight: 500; margin-top: 1px;">
+                            by <img src="/static/img/ethan_labs_logo.png" style="width: 11px; height: 11px; border-radius: 2px; vertical-align: middle;" alt="Ethan Labs"> Ethan Labs
+                        </span>
+                    </div>
                 </a>
                 <nav style="display: flex; gap: 0.5rem; background: #18181b; padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
                     <a href="/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 700; text-decoration: none; background: #fff; color: #000; display: flex; align-items: center; gap: 0.4rem;">
@@ -28,6 +33,11 @@
                     <a href="/exchange/" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
                         <span>💱</span> <span>실시간 환율 정보</span>
                     </a>
+                    {% if user.email == 'ethan@ncomputing.com' or user.username == 'ethan@ncomputing.com' %}
+                    <a href="{% url 'accounts:admin_dashboard' %}" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: #34d399; border: 1px solid rgba(16,185,129,0.3); background: rgba(6,78,59,0.4); display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;">
+                        <span>⚡</span> <span>관리자 패널</span>
+                    </a>
+                    {% endif %}
                     {% if user.is_staff or user.is_superuser %}
                     <a href="{% url 'accounts:user_management' %}" style="padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600; text-decoration: none; color: #a1a1aa; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
                         <span>👥</span> <span>사용자/팀 관리</span>
@@ -61,7 +71,13 @@
                     </svg>
                 </div>
                 <div class="brand-text">
-                    <h1>AI News <span>Intelligence</span></h1>
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <h1>AI News <span>Intelligence</span></h1>
+                        <span style="font-size: 0.68rem; font-family: monospace; padding: 2px 7px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #a1a1aa; display: inline-flex; align-items: center; gap: 4px;" title="Engineered by Ethan Labs">
+                            <img src="/static/img/ethan_labs_logo.png" style="width: 12px; height: 12px; border-radius: 2px;" alt="Ethan Labs">
+                            Ethan Labs
+                        </span>
+                    </div>
                     <p class="subtitle">엔터프라이즈 맞춤형 AI 뉴스 큐레이션 & 브리핑</p>
                 </div>
             </div>
@@ -499,6 +515,26 @@ NAVER_CLIENT_SECRET=your_client_secret</code></pre>
             </div>
         </div>
     </div>
+
+    <!-- Global Footer for Authenticated Sessions: Ethan Labs Signature -->
+    <footer style="margin-top: 5rem; border-top: 1px solid rgba(255,255,255,0.06); background: rgba(14, 14, 18, 0.7); backdrop-filter: blur(12px); padding: 1.5rem 2rem;">
+        <div style="max-width: 1400px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+            <!-- Ethan Labs Signature (Exact User Spec) -->
+            <div style="display: inline-flex; align-items: center; gap: 0.65rem; padding: 0.4rem 0.9rem; border-radius: 0.75rem; background: #18181b; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 2px 8px rgba(0,0,0,0.4);">
+                <img src="/static/img/ethan_labs_logo.png" alt="Ethan Labs" style="width: 22px; height: 22px; border-radius: 6px; object-fit: contain;">
+                <span style="font-size: 0.85rem; color: #d4d4d8; font-weight: 500; letter-spacing: -0.01em;">
+                    Developed &amp; Engineered by <span style="font-weight: 700; color: #ffffff; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; text-decoration-color: #a1a1aa;">Ethan Labs</span>
+                </span>
+            </div>
+
+            <!-- System Meta & Copyright -->
+            <div style="font-size: 0.75rem; font-family: monospace; color: #71717a; display: flex; align-items: center; gap: 0.75rem;">
+                <span>BI CLOUD SaaS</span>
+                <span>•</span>
+                <span>Enterprise News &amp; Intelligence</span>
+            </div>
+        </div>
+    </footer>
 
     <script id="initialKeywordsData" type="application/json">
         {{ keywords_json|safe }}

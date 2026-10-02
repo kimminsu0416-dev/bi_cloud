@@ -14,8 +14,13 @@
   <div class="flex flex-col md:flex-row md:items-end md:justify-between pb-6 border-b border-zinc-800 gap-6">
     <div class="space-y-2">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-xs font-mono text-zinc-400">
-        <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-        <span>한국수출입은행 실시간 환율 데이터 연동</span>
+        {% if is_sample %}
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span class="text-amber-300">기준 샘플 환율 모드</span>
+        {% else %}
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-emerald-300">한국수출입은행 실시간 환율 연동 중</span>
+        {% endif %}
       </div>
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-1">
         실시간 환율 및 통화 환산 인텔리전스
@@ -30,7 +35,7 @@
       <div class="bg-zinc-900 border border-zinc-800 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-mono text-zinc-300">
         고시 기준일: <span class="text-white font-bold ml-1">{{ query_date }}</span>
       </div>
-      <button onclick="location.reload()" class="p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl transition border border-zinc-800" title="새로고침">
+      <button onclick="window.location.href = window.location.pathname + '?refresh=1'" class="p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl transition border border-zinc-800 flex items-center gap-1.5" title="실시간 최신 환율 강제 새로고침">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
